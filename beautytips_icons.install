@@ -1,0 +1,40 @@
+<?php
+/**
+ * @file
+ * Code related to the installation and uninstallation of
+ *   beautytips icons administration.
+ */
+
+/**
+ * Implements hook_schema_alter().
+ */
+function beautytips_icons_schema_alter(&$schema) {
+  $schema['beautytips_custom_tips']['fields']['icon'] = array('type' => 'text', 'not null' => FALSE);
+}
+
+/**
+ * Implements hook_install().
+ */
+function beautytips_icons_install() {
+  // Alter block table, as defined in beautytips_icons_schema_alter().
+  $ret = array();
+  $schema = array();
+  beautytips_icons_schema_alter($schema);
+  foreach ($schema['beautytips_custom_tips']['fields'] as $name => $spec) {
+    db_add_field('beautytips_custom_tips', $name, $spec);
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function beautytips_icons_uninstall() {
+  // Drop fields from block table, as defined in
+  // beautytips_icons_schema_alter().
+  $ret = array();
+  $schema = array();
+  beautytips_icons_schema_alter($schema);
+  foreach ($schema['beautytips_custom_tips']['fields'] as $name => $spec) {
+    db_drop_field('beautytips_custom_tips', $name);
+  }
+}

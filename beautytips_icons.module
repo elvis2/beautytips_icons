@@ -1,0 +1,193 @@
+<?php
+
+/**
+ * @file
+ * Defines an icon which triggers a tooltip.
+ */
+
+/**
+ * Add icons on beautytips custom tips form via form alter.
+ */
+function beautytips_icons_form_beautytips_manager_custom_tips_form_alter(&$form, &$form_state, $form_id) {
+
+  // Grab the tip to get the icons info.
+  $tip_id = $form['tip']['id']['#value'];
+  $tip = beautytips_manager_get_custom_tip($tip_id);
+  $icon = unserialize($tip->icon);
+
+  // Before we begin with adding the icon options, let's give some weights to
+  // to the original form elements on the page.
+  $weight = 0;
+  foreach ($form['tip'] as $name => $element) {
+    if (strpos($name, '#') === FALSE) {
+      $weight++;
+      $form['tip'][$name]['#weight'] = $weight;
+    }
+  }
+
+  $options = array();
+  $custom_icons = _beautytips_icons_get_custom_icons();
+  $default_icons = _beautytips_icons_get_default_icons();
+  if (count($custom_icons)) {
+    $options[t('custom')] = $custom_icons;
+    $options[t('default')] = $default_icons;
+  }
+  else {
+    $options = $default_icons;
+  }
+
+  $form['tip']['icon'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Add icons'),
+    '#description' => t('Give the user a icon of a beautytip with an icon.'),
+    '#attributes' => array('class' => array('bt-icons')),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#weight' => 3,
+    '#prefix' => '<div class="bt-icons-wrapper clearfix">',
+    '#suffix' => '</div>',
+  );
+
+  $form['tip']['icon']['enable'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable this icon.'),
+    '#default_value' => $icon['enable'],
+  );
+
+  $form['tip']['icon']['icon'] = array(
+    '#type' => 'select',
+    '#title' => t('Icon'),
+    '#description' => t('Choose the icon that triggers the tooltip.'),
+    '#default_value' => $icon['icon'],
+    '#options' => $options,
+    '#attributes' => array('class' => array('beautytips-icons-icon-select')),
+  );
+
+  $form['tip']['icon']['icon_size'] = array(
+    '#type' => 'select',
+    '#title' => t('Icon size'),
+    '#description' => t('The default icons come in two sizes. Select the icon size.'),
+    '#default_value' => $icon['icon_size'],
+    '#options' => array(
+      '16' => t('16 px'),
+      '24' => t('24 px'),
+    ),
+  );
+
+  $form['#validate'][] = 'beautytips_icons_custom_tips_form_validate';
+}
+
+/**
+ * Validation callback to handle icons on beautytips manager custom tips form.
+ */
+function beautytips_icons_custom_tips_form_validate($form, &$form_state) {
+  $icon = $form_state['values']['tip']['icon'];
+
+  if ($icon['enable']) {
+
+    // Serialize data.
+    $form_state['values']['tip']['icon'] = serialize($icon);
+  }
+  else {
+    $form_state['values']['tip']['icon'] = NULL;
+  }
+}
+
+/**
+ * Implements hook_js_alter().
+ */
+function beautytips_icons_js_alter(&$js) {
+
+  $tips = beautytips_manager_get_custom_tips();
+
+  $load_bti_js = FALSE;
+
+  // Find our tip data within the js.
+  foreach ($js['settings']['data'] as $k => $data) {
+
+    if (isset($data['beautytips']) && is_array($data['beautytips'])) {
+      foreach ($data['beautytips'] as $key => $value) {
+        foreach ($tips as $tip) {
+          if ($value['cssSelect'] == $tip->element && !empty($tip->icon) && !empty($tip->content)) {
+
+            // We need to load our own js later since we found a match.
+            if (empty($load_bti_js)) {
+              $load_bti_js = TRUE;
+            }
+
+            // Make changes to $js to force our icons to load the popup.
+            // Unserialize the icon.
+            $icon = (array) unserialize($tip->icon);
+
+            // Get the icon path.
+            $icon['icon'] = _beautytips_icons_get_icon_path($icon);
+
+            // Update $icon.
+            $js['settings']['data'][$k]['beautytips'][$key]['icon'] = $icon;
+
+            // Change the selector so the text will now load on the icon.
+            $selector = '.beautytips-' . $tip->id;
+            $js['settings']['data'][$k]['beautytips'][$key]['cssSelect'] = $selector;
+
+            // We need a clean version without the ".". We will use later in js.
+            $js['settings']['data'][$k]['beautytips'][$key]['cssSelect_clean'] = 'beautytips-' . $tip->id;
+
+            // Add original cssSelect.
+            $js['settings']['data'][$k]['beautytips'][$key]['cssSelect_original'] = $value['cssSelect'];
+          }
+        }
+      }
+    }
+  }
+
+  // Add the js and css.
+  if ($load_bti_js) {
+    $path = drupal_get_path('module', 'beautytips_icons');
+    drupal_add_js($path . '/js/beautytips_icons.js', array('group' => -100, 'weight' => -1));
+    drupal_add_css($path . '/css/beautytips_icons.css');
+  }
+}
+
+/**
+ * Builds a list of icons in the theme folder and the files folder.
+ */
+function _beautytips_icons_get_custom_icons() {
+
+  // Detect icons in the beautytips_icons directory in the default theme.
+  $theme_path = drupal_get_path('theme', variable_get('theme_default', 'bartik')) . '/beautytips_icons';
+  $theme_files = file_scan_directory($theme_path, '/\.(png|jpg|gif)$/');
+
+  // Detect icons in the beautytips_icons directory in the files folder.
+  $upload_path = variable_get('file_public_path', conf_path() . '/files') . '/beautytips_icons';
+  $uploaded_files = file_scan_directory($upload_path, '/\.(png|jpg|gif)$/');
+
+  $icons = array();
+  foreach (array_merge($theme_files, $uploaded_files) as $icon) {
+    $icons[$icon->uri] = $icon->name;
+  }
+  return $icons;
+}
+
+/**
+ * Returns a fixed list of selected icons included in Drupal.
+ */
+function _beautytips_icons_get_default_icons() {
+  return array(
+    'misc/message-SIZE-info.png' => t('Info'),
+    'misc/message-SIZE-help.png' => t('Help'),
+    'misc/message-SIZE-warning.png' => t('Warning'),
+    'misc/message-SIZE-ok.png' => t('OK'),
+    'misc/message-SIZE-error.png' => t('Error'),
+  );
+}
+
+/**
+ * Builds the icon file path based on formatter settings.
+ */
+function _beautytips_icons_get_icon_path($settings) {
+  // If the icon is one of the 5 default icons, merge in the chosen size.
+  if (array_key_exists($settings['icon'], _beautytips_icons_get_default_icons())) {
+    return str_replace('SIZE', $settings['icon_size'], $settings['icon']);
+  }
+  return $settings['icon'];
+}

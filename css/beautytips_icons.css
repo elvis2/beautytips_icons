@@ -1,0 +1,26 @@
+html.js input.form-autocomplete.bti {
+  background-position: right 5px center;
+  background-repeat: no-repeat;
+}
+
+body input.bti {
+  background-position: right 5px center;
+  background-repeat: no-repeat;
+}
+
+body label.bti {
+  background-position: right top;
+  background-repeat: no-repeat;
+}
+
+.bti.select {
+  background-position: left 10px top 5px;
+  background-repeat: no-repeat;
+  width: 30px;
+  height: 19px;
+  display: inline-block;
+}
+
+div.bti {
+  background-position: right 5px top;
+}

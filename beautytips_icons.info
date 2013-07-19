@@ -1,0 +1,4 @@
+name = Beautytips Icons
+description = "Add icons to your beautytips."
+core = 7.x
+dependencies[] = beautytips_manager
