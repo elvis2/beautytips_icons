@@ -24,7 +24,7 @@
           // var parent = $(selector).parent(); // We might need this later. elvis2
           var last = $(selector + ":last");
           var lastTag = $(last).attr('tagName');
-          var bti_class = "bti " + selector_clean + " " + icon['icon_size'];
+          var bti_class = "bti-" + icon['icon_size'] + " " + selector_clean;
 
           // Save for reference.
           // $(tip['cssSelect']).after(code);

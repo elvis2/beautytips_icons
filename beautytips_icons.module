@@ -44,14 +44,51 @@ function beautytips_icons_form_beautytips_manager_custom_tips_form_alter(&$form,
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#weight' => 3,
-    '#prefix' => '<div class="bt-icons-wrapper clearfix">',
-    '#suffix' => '</div>',
   );
 
   $form['tip']['icon']['enable'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable this icon.'),
     '#default_value' => $icon['enable'],
+  );
+
+  $placements = array(0 => '-- Optional --', 'inside' => t('Inside of Element'), 'outside' => t('Outside of Element'));
+
+  $form['tip']['icon']['placement'] = array(
+    '#type' => 'select',
+    '#title' => t('Placement of Icon'),
+    '#options' => $placements,
+    '#description' => 'NOT FUNCTIONAL YET - Elelement refers to the field above "Add Icons".'
+  );
+
+  $positions = array(0 => '-- Optional --', 'after' => t('After a Sub-Element'), 'before' => t('Before a Sub-Element'));
+
+  $form['tip']['icon']['position'] = array(
+    '#type' => 'select',
+    '#title' => t('Position of Icon'),
+    '#options' => $positions,
+    '#states' => array(
+      'visible' => array(
+        'select#edit-tip-icon-placement' => array(
+          array('value' => 'inside'),
+          array('value' => 'outside'),
+        ),
+      ),
+    ),
+  );
+
+  $form['tip']['icon']['sub-element'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Sub-Element'),
+    '#description' => t('The icon will be placed before or after the sub-element.'),
+    '#states' => array(
+      'visible' => array(
+        'select#edit-tip-icon-position' => array(
+          array('value' => 'after'),
+          array('value' => 'before'),
+        ),
+      ),
+    ),
   );
 
   $form['tip']['icon']['icon'] = array(

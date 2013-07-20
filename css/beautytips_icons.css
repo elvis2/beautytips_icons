@@ -1,26 +1,55 @@
-html.js input.form-autocomplete.bti {
-  background-position: right 5px center;
+input.form-text.form-autocomplete.bti-16 {
+  background-position: right center;
   background-repeat: no-repeat;
 }
 
-body input.bti {
-  background-position: right 5px center;
+input.form-text.bti-16 {
+  background-position: right center;
   background-repeat: no-repeat;
 }
 
-body label.bti {
-  background-position: right top;
+label.bti-16 {
+  background-position: right center;
   background-repeat: no-repeat;
 }
 
-.bti.select {
-  background-position: left 10px top 5px;
+div.bti-16 {
+  background-position: right center;
+  background-repeat: no-repeat;
+}
+
+.bti-16.select {
+  background-position: right center;
   background-repeat: no-repeat;
   width: 30px;
   height: 19px;
   display: inline-block;
 }
 
-div.bti {
-  background-position: right 5px top;
+input.form-text.form-autocomplete.bti-24 {
+  background-position: right center;
+  background-repeat: no-repeat;
+}
+
+input.form-text.bti-24 {
+  background-position: right center;
+  background-repeat: no-repeat;
+}
+
+label.bti-24 {
+  background-position: right center;
+  background-repeat: no-repeat;
+}
+
+div.bti-24 {
+  background-position: right center;
+  background-repeat: no-repeat;
+}
+
+.bti-24.select {
+  background-position: right center;
+  background-repeat: no-repeat;
+  width: 30px;
+  height: 19px;
+  display: inline-block;
 }
